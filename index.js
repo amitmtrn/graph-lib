@@ -7,36 +7,37 @@ var Graph = (function () {
         this.graph = initialGraph;
     }
     /**
-     * tests whether there is an edge from the vertices x to y
+     * tests whether there is an edge from the vertices
      */
     Graph.prototype.adjacent = function (vertex1, vertex2) {
-        var vertices = this.graph.reduce(function (initial, graphVertex) {
-            if (graphVertex === vertex1)
-                return graphVertex.vertices;
-            return initial;
-        }, null);
-        if (vertices === null)
-            throw new Error('vertex did not found');
-        return vertices.includes(vertex2);
+        if (this.graph.indexOf(vertex1) === -1)
+            throw new Error('the vertex is not found in the graph');
+        var exists = false;
+        vertex1.edges.forEach(function (edge) {
+            if (edge.vertex === vertex2)
+                exists = true;
+        });
+        return exists;
     };
     /**
-     * lists all vertices y such that there is an edge from the vertices x to y
+     * lists all vertices y such that there is an edge from the vertices
      */
     Graph.prototype.neighbors = function (vertex) {
-        return this.graph.reduce(function (initial, graphVertex) {
-            if (graphVertex === vertex)
-                return graphVertex.vertices;
-            return initial;
-        }, null);
+        if (this.graph.indexOf(vertex) === -1)
+            throw new Error('the vertex is not found in the graph');
+        return vertex.edges.reduce(function (vertices, edge) {
+            vertices.push(edge.vertex);
+            return vertices;
+        }, []);
     };
     /**
-     * adds the vertex x, if it is not there
+     * adds the vertex, if it is not there
      */
     Graph.prototype.addVertex = function (vertex) {
         return this.graph.push(vertex);
     };
     /**
-     * removes the vertex x, if it is there
+     * removes the vertex, if it is there
      */
     Graph.prototype.removeVertex = function (vertex) {
         var indexToRemove = this.graph.indexOf(vertex);
@@ -44,32 +45,40 @@ var Graph = (function () {
             return false;
         this.graph.splice(indexToRemove, 1);
         this.graph.forEach(function (v) {
-            if (v.vertices.indexOf(vertex) !== -1) {
-                var indexToRemove_1 = v.vertices.indexOf(vertex);
-                v.vertices.splice(indexToRemove_1, 1);
-            }
+            v.edges.forEach(function (e, i) {
+                if (e.vertex === vertex)
+                    v.edges.splice(i, 1);
+            });
         });
         return true;
     };
     /**
-     * adds the edge from the vertices x to y, if it is not there
+     * adds the edge from the vertices, if it is not there
      */
     Graph.prototype.addEdge = function (vertex1, vertex2) {
-        if (this.graph.indexOf(vertex1) !== -1
-            && vertex1.vertices.indexOf(vertex2) === -1) {
-            vertex1.vertices.push(vertex2);
+        if (this.graph.indexOf(vertex1) !== -1) {
+            var exists = false;
+            for (var i = 0; i < vertex1.edges.length; i++)
+                if (vertex1.edges[i].vertex === vertex2)
+                    exists = true;
+            if (!exists)
+                vertex1.edges.push({
+                    vertex: vertex2,
+                    value: NaN
+                });
             return vertex1;
         }
         return null;
     };
     /**
-     * removes the edge from the vertices x to y, if it is there
+     * removes the edge from the vertices, if it is there
      */
     Graph.prototype.removeEdge = function (vertex1, vertex2) {
-        if (this.graph.indexOf(vertex1) !== -1
-            && vertex1.vertices.indexOf(vertex2) !== -1) {
-            var indexToRemove = vertex1.vertices.indexOf(vertex2);
-            vertex1.vertices.splice(indexToRemove, 1);
+        if (this.graph.indexOf(vertex1) !== -1) {
+            vertex1.edges.forEach(function (e, i) {
+                if (e.vertex === vertex2)
+                    vertex1.edges.splice(i, 1);
+            });
             return vertex1;
         }
         return null;
@@ -81,7 +90,7 @@ var Graph = (function () {
         if (this.graph.indexOf(vertex) !== -1) {
             return vertex.value;
         }
-        return NaN;
+        return '';
     };
     /**
      * sets the value associated with the vertex x to v
@@ -94,16 +103,32 @@ var Graph = (function () {
         return null;
     };
     /**
-     * returns the value associated with the edge (x, y)
+     * returns the value associated with the edge
      */
-    Graph.prototype.getEdgeValue = function (x, y) {
-        // work in progress
+    Graph.prototype.getEdgeValue = function (vertex1, vertex2) {
+        if (this.graph.indexOf(vertex1) !== -1) {
+            var value_1 = NaN;
+            vertex1.edges.forEach(function (e, i) {
+                if (e.vertex === vertex2)
+                    value_1 = e.value;
+            });
+            return value_1;
+        }
     };
     /**
      * sets the value associated with the edge (x, y) to v.
      */
-    Graph.prototype.setEdgeValue = function (x, y, v) {
-        // work in progres
+    Graph.prototype.setEdgeValue = function (vertex1, vertex2, value) {
+        if (this.graph.indexOf(vertex1) !== -1) {
+            var edge_1 = null;
+            vertex1.edges.forEach(function (e, i) {
+                if (e.vertex === vertex2) {
+                    e.value = value;
+                    edge_1 = e;
+                }
+            });
+            return value;
+        }
     };
     return Graph;
 }());

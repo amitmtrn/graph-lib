@@ -1,8 +1,13 @@
 declare var module: any;
 
 interface Vertex {
+  value: string;
+  edges: Array<Edge>;
+}
+
+interface Edge {
   value: number;
-  vertices: Array<Vertex>;
+  vertex: Vertex;
 }
 
 /**
@@ -16,42 +21,40 @@ class Graph {
     }
 
     /**
-     * tests whether there is an edge from the vertices x to y
+     * tests whether there is an edge from the vertices
      */
     adjacent(vertex1: Vertex, vertex2: Vertex) {
-      const vertices = this.graph.reduce((initial, graphVertex) => {
-        if(graphVertex === vertex1)
-          return graphVertex.vertices;
+      if(this.graph.indexOf(vertex1) === -1) throw new Error('the vertex is not found in the graph');
+      let exists = false;
 
-        return initial;
-      }, null);
+      vertex1.edges.forEach((edge) => {
+        if(edge.vertex === vertex2) exists = true;
+      });
 
-      if(vertices === null) throw new Error('vertex did not found');
-
-      return vertices.includes(vertex2);
+      return exists;
     }
 
     /**
-     * lists all vertices y such that there is an edge from the vertices x to y
+     * lists all vertices y such that there is an edge from the vertices
      */
     neighbors(vertex: Vertex) {
-      return this.graph.reduce((initial, graphVertex) => {
-        if(graphVertex === vertex)
-          return graphVertex.vertices;
+      if(this.graph.indexOf(vertex) === -1) throw new Error('the vertex is not found in the graph');
 
-        return initial;
-      }, null);
+      return vertex.edges.reduce((vertices, edge) => {
+        vertices.push(edge.vertex);
+        return vertices;
+      }, []);
     }
 
     /**
-     * adds the vertex x, if it is not there
+     * adds the vertex, if it is not there
      */
     addVertex(vertex: Vertex) {
         return this.graph.push(vertex);
     }
 
     /**
-     * removes the vertex x, if it is there
+     * removes the vertex, if it is there
      */
     removeVertex(vertex: Vertex) {
       const indexToRemove = this.graph.indexOf(vertex);
@@ -60,23 +63,29 @@ class Graph {
 
       this.graph.splice(indexToRemove, 1);
       this.graph.forEach((v) => {
-
-        if(v.vertices.indexOf(vertex) !== -1) {
-          const indexToRemove = v.vertices.indexOf(vertex);
-          v.vertices.splice(indexToRemove, 1);
-        }
+        v.edges.forEach((e, i) => {
+          if(e.vertex === vertex) v.edges.splice(i, 1);
+        });
       });
 
       return true;
     }
 
     /**
-     * adds the edge from the vertices x to y, if it is not there
+     * adds the edge from the vertices, if it is not there
      */
     addEdge(vertex1: Vertex, vertex2: Vertex) {
-      if (this.graph.indexOf(vertex1) !== -1
-      && vertex1.vertices.indexOf(vertex2) === -1) {
-        vertex1.vertices.push(vertex2);
+      if (this.graph.indexOf(vertex1) !== -1) {
+        let exists = false;
+
+        for(let i = 0; i < vertex1.edges.length; i++)
+          if(vertex1.edges[i].vertex === vertex2) exists = true;
+
+        if(!exists)
+          vertex1.edges.push({
+            vertex: vertex2,
+            value: NaN
+          });
 
         return vertex1;
       }
@@ -84,13 +93,15 @@ class Graph {
     }
 
     /**
-     * removes the edge from the vertices x to y, if it is there
+     * removes the edge from the vertices, if it is there
      */
     removeEdge(vertex1: Vertex, vertex2: Vertex) {
-      if (this.graph.indexOf(vertex1) !== -1
-      && vertex1.vertices.indexOf(vertex2) !== -1) {
-        const indexToRemove = vertex1.vertices.indexOf(vertex2);
-        vertex1.vertices.splice(indexToRemove, 1);
+      if (this.graph.indexOf(vertex1) !== -1) {
+
+        vertex1.edges.forEach((e, i) => {
+          if(e.vertex === vertex2)
+            vertex1.edges.splice(i, 1);
+        });
 
         return vertex1;
       }
@@ -106,13 +117,13 @@ class Graph {
         return vertex.value;
       }
 
-      return NaN;
+      return '';
     }
 
     /**
      * sets the value associated with the vertex x to v
      */
-    setVertexValue(vertex: Vertex, value: number) {
+    setVertexValue(vertex: Vertex, value: string) {
       if (this.graph.indexOf(vertex) !== -1) {
         vertex.value = value;
         return vertex;
@@ -122,17 +133,37 @@ class Graph {
     }
 
     /**
-     * returns the value associated with the edge (x, y)
+     * returns the value associated with the edge
      */
-    getEdgeValue(x, y) {
-      // work in progress
+    getEdgeValue(vertex1, vertex2) {
+      if (this.graph.indexOf(vertex1) !== -1) {
+        let value = NaN;
+
+        vertex1.edges.forEach((e, i) => {
+          if(e.vertex === vertex2)
+            value = e.value;
+        });
+
+        return value;
+      }
     }
 
     /**
      * sets the value associated with the edge (x, y) to v.
      */
-    setEdgeValue(x, y, v) {
-      // work in progres
+    setEdgeValue(vertex1, vertex2, value) {
+      if (this.graph.indexOf(vertex1) !== -1) {
+        let edge = null;
+
+        vertex1.edges.forEach((e, i) => {
+          if(e.vertex === vertex2) {
+            e.value = value;
+            edge = e;
+          }
+        });
+
+        return value;
+      }
     }
 }
 

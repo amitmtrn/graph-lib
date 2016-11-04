@@ -6,17 +6,17 @@ const graph = new Graph();
 
 const v1 = {
   value: 1,
-  vertices: []
+  edges: []
 }
 
 const v2 = {
   value: 2,
-  vertices: []
+  edges: []
 }
 
 const v3 = {
   value: 3,
-  vertices: []
+  edges: []
 }
 
 graph.addVertex(v1);

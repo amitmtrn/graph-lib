@@ -2,15 +2,15 @@ var Graph = require('./index');
 var graph = new Graph();
 var v1 = {
     value: 1,
-    vertices: []
+    edges: []
 };
 var v2 = {
     value: 2,
-    vertices: []
+    edges: []
 };
 var v3 = {
     value: 3,
-    vertices: []
+    edges: []
 };
 graph.addVertex(v1);
 graph.addVertex(v2);
